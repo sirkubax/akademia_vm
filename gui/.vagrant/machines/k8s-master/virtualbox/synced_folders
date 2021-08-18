@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/kuba/akademiaansible/szkolenie/gui","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/kuba/workspace/git/akademia_vm/gui","disabled":false,"__vagrantfile":true}}}
