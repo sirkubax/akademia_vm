@@ -1,0 +1,40 @@
+[all:vars]
+system_env=szkolenie
+location=london_akademiaansible
+
+#przykład grupy mylocalhost
+[mylocalhost]
+localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python"
+
+
+#grupa apache
+[apache]
+192.168.50.10
+
+[backend]
+192.168.50.10
+
+[prod:children]
+apache
+backend
+
+[wordpress]
+192.168.50.10
+
+[loadbalancer]
+192.168.50.10
+
+[mysql]
+192.168.50.10
+
+[zabbix_agent]
+192.168.50.10
+
+[naszaaplikacja]
+192.168.50.10
+
+[naszaaplikacja_mysql]
+192.168.50.10
+
+[naszaaplikacja_loadbalancer]
+192.168.50.10
