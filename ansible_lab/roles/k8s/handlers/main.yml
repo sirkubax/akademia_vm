@@ -1,0 +1,16 @@
+- name: docker status
+  service: 
+    name: docker
+    state: started
+
+- name: Restart docker
+  service:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+
+- name: Restart kubelet
+  service:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted

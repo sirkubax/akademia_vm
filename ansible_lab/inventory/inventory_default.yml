@@ -1,6 +1,7 @@
 [all:vars]
 system_env=szkolenie
 location=london_akademiaansible
+ansible_ssh_private_key_file=~/.ssh/vm_key
 
 #przykład grupy mylocalhost
 [mylocalhost]
@@ -9,32 +10,32 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 
 #grupa apache
 [apache]
-192.168.50.10
+192.168.50.20
 
 [backend]
-192.168.50.10
+192.168.50.20
 
 [prod:children]
 apache
 backend
 
 [wordpress]
-192.168.50.10
+192.168.50.20
 
 [loadbalancer]
-192.168.50.10
+192.168.50.20
 
 [mysql]
-192.168.50.10
+192.168.50.20
 
 [zabbix_agent]
-192.168.50.10
+192.168.50.20
 
 [naszaaplikacja]
-192.168.50.10
+192.168.50.20
 
 [naszaaplikacja_mysql]
-192.168.50.10
+192.168.50.20
 
 [naszaaplikacja_loadbalancer]
-192.168.50.10
+192.168.50.20

@@ -1,0 +1,34 @@
+IMAGE_NAME = "bento/ubuntu-20.04"
+N = 2
+
+Vagrant.configure("2") do |config|
+    config.ssh.insert_key = false
+
+    config.vm.provider "virtualbox" do |v|
+        v.memory = 2024
+        v.cpus = 2
+        v.gui = true
+        v.customize ["modifyvm", :id, "--vram", "64"]
+    end
+#https://askubuntu.com/questions/1134892/ubuntu-18-04-20-04-lts-on-virtualbox-boots-up-but-black-login-screen
+# gui 64mb for vbox-guest
+      
+    config.vm.define "lab-gui" do |gui|
+        gui.vm.box = IMAGE_NAME
+        gui.vm.network "private_network", ip: "192.168.50.10"
+        gui.vm.hostname = "gui"
+        gui.vm.provision "ansible" do |ansible|
+            ansible.playbook = "gui-playbook.yml"
+            ansible.extra_vars = {
+                node_ip: "192.168.50.10",
+            }
+            ansible.verbose = "-vvv"
+        end
+       gui.vm.provision "shell", inline: "sudo apt-get update"
+       gui.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils"
+       gui.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop"
+       #  # Permit anyone to start the GUI
+       # or desktop wont load after login
+       gui.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+    end
+end

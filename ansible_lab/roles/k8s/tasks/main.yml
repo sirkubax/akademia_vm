@@ -1,0 +1,167 @@
+---
+- name: Check if Kubernetes has already been initialized.
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_init_stat
+
+- include: k8s_requirements.yml
+  when: not kubernetes_init_stat.stat.exists or override_install 
+
+- include: install.yml
+  when: not kubernetes_init_stat.stat.exists or override_install
+
+- include: k8s_requirements.yml
+  when: not kubernetes_init_stat.stat.exists or override_install
+
+- include: master.yml
+  when: ( inventory_hostname == groups['k8s_master_nodes']|first and not kubernetes_init_stat.stat.exists) or override_install
+  run_once: true
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_command
+  run_once: true
+
+- name: Copy join command to local file
+  become: false
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+
+#- include: workers.yml
+#
+#
+- name: Get the kubeadm cert key
+  #TODO JM: there should be a better way to get cert key - secrets or filesystem?
+  #command: kubeadm init phase upload-certs --upload-certs --config kubeadm-config.yaml
+  command: kubeadm init phase upload-certs --upload-certs
+  #via:
+  #https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+  #shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  changed_when: false
+  register: kubernetes_cert_key_command_result
+  when: 
+    - inventory_hostname == groups['k8s_master_nodes']|first
+
+- name: Get the kubeadm join command from the Kubernetes master.
+  command: kubeadm token create --print-join-command
+  changed_when: false
+  when: 
+    - inventory_hostname == groups['k8s_master_nodes']|first
+  register: kubernetes_join_command_result
+
+- name: Set the kubeadm MASTERS join command.
+  set_fact:
+    kubernetes_join_command: >
+      {{ kubernetes_join_command_result.stdout }}
+      --control-plane --certificate-key {{ kubernetes_cert_key_command_result.stdout_lines[2] }}
+      {{ kubernetes_join_command_extra_opts }}
+  when: kubernetes_join_command_result.stdout is defined
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  with_items: "{{ groups['k8s_master_nodes'] }}"
+
+- name: Join node to Kubernetes master
+  shell: >
+    {{ kubernetes_join_command }}
+    creates=/etc/kubernetes/kubelet.conf
+  when: 
+    - not ansible_check_mode
+    - inventory_hostname in groups['k8s_master_nodes']
+
+- name: Set the kubeadm NODES join command.
+  set_fact:
+    kubernetes_join_command: >
+      {{ kubernetes_join_command_result.stdout }}
+      {{ kubernetes_join_command_extra_opts }}
+  when: kubernetes_join_command_result.stdout is defined
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  with_items: "{{ groups['k8s_compute_nodes'] + groups['k8s_infra_nodes'] }}"
+
+- include_tasks: workers.yml
+  when: 
+    - inventory_hostname in (groups['k8s_compute_nodes'] + groups['k8s_infra_nodes'])
+
+#- name: Label infra nodes
+#  shell: >
+#    kubectl label node --overwrite {{ ansible_fqdn }} {{ item.name }}={{ item.value }}
+#  delegate_to: "{{ groups['k8s_master_nodes']|first }}"
+#  when: 
+#    - not ansible_check_mode
+#    - inventory_hostname in groups['k8s_infra_nodes']
+#    - "{{ kubernetes_custom_node_label |length == 0 }}"
+#  with_items: "{{ kubernetes_infra_nodes_labels }}"
+#  tags:
+#    - node_labels
+#
+#- name: Label compute nodes
+#  shell: >
+#    kubectl label node --overwrite {{ ansible_fqdn }} {{ item.name }}={{ item.value }}
+#  delegate_to: "{{ groups['k8s_master_nodes']|first }}"
+#  when: 
+#    - not ansible_check_mode
+#    - inventory_hostname in groups['k8s_compute_nodes']
+#    - "{{ kubernetes_custom_node_label |length == 0 }}"
+#  with_items: "{{ kubernetes_compute_nodes_labels }}"
+#  tags:
+#    - node_labels
+
+#- name: Custom Label nodes
+#  shell: >
+#    kubectl label node --overwrite {{ ansible_fqdn }} {{ item.name }}={{ item.value }}
+#  delegate_to: "{{ groups['k8s_master_nodes']|first }}"
+#  when: 
+#    - not ansible_check_mode
+#    - "{{ kubernetes_custom_node_label |length > 0 }}"
+#  with_items: "{{ kubernetes_custom_nodes_labels }}"
+#  tags:
+#    - node_labels
+
+- name: Ensure .kube directory exists.
+  file:
+    path: ~/.kube
+    state: directory
+  become: yes
+
+- name: Symlink the kubectl admin.conf to ~/.kube/conf.
+  file:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    state: link
+  become: yes
+  when:
+    - not ansible_check_mode
+    - inventory_hostname in groups['k8s_master_nodes']
+
+#- name: docker proxy
+#  copy:
+#    content: |
+#      [Service]
+#      Environment="HTTPS_PROXY={{ proxy_url }}"
+#    dest: "/etc/systemd/system/docker.service.d/https-proxy.conf"
+#  notify: docker restart
+#
+#- name: docker proxy
+#  copy:
+#    content: |
+#      [Service]
+#      Environment="HTTP_PROXY={{ proxy_url }}"
+#    dest: "/etc/systemd/system/docker.service.d/http-proxy.conf"
+#  notify: docker restart
+#
+#- name: docker proxy
+#  copy:
+#    content: |
+#      [Service]
+#      Environment="NO_PROXY={{ proxy_excluded_urls }}"
+#    dest: "/etc/systemd/system/docker.service.d/no-proxy.conf"
+#  notify: docker restart
+#
+#- name: docker proxy
+#  copy:
+#    content: |
+#      [Unit]
+#      After=docker.service
+#    dest: "/usr/lib/systemd/system/kubelet.service.d/11-kubeadm.conf"
+#  notify: daemon-reload
+#  tags:
+#    - k8s_docker_dependency

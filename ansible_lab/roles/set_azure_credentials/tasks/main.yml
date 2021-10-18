@@ -1,0 +1,21 @@
+  - name: check az login status, do az login if this fail
+    shell: az account show
+
+#{ 
+#  "environmentName": "AzureCloud",
+#  "homeTenantId": "c69588ca-1fb4-4f8d-a10f-b748e2f79b4b",
+#  "id": "149007b7-60ed-49ae-983a-b038a901db43",
+#  "isDefault": true,
+#  "managedByTenants": [],
+#  "name": "Pay-As-You-Go",
+#  "state": "Enabled",
+#  "tenantId": "c69588ca-1fb4-4f8d-a10f-b748e2f79b4b",
+#  "user": {
+#    "name": "sirkubax@gmail.com",
+#    "type": "user"
+#  }
+#}
+
+  - name: Set subscription (you need to be logged in with az login)
+    shell: az account set --subscription {{ env_azure.subscription_id }} 
+

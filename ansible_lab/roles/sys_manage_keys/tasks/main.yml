@@ -1,0 +1,5 @@
+- authorized_key: user=ubuntu key="{{ lookup('file', item.name) }}" state="{{ item.state | default('present') }}"
+  with_items:
+    #- { name: id_rsa.kub.pub, state: absent }
+    - { name: example_key.pub }
+    - { name: adam.pub }

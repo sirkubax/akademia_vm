@@ -2,6 +2,8 @@
 env/
 venv*/
 /**/env/**/
+/**/.vagrant/
+*/.vagrant/
 *.swp
 *.swn
 *.swo

@@ -1,0 +1,29 @@
+
+  - name: Create a resource group
+    azure_rm_resourcegroup:
+      name: "{{ env_azure.resource_group_name }}"
+      location: "{{ env_azure.location }}"
+      subscription_id: "{{ env_azure.subscription_id |default('') }}"
+
+  - name: Create virtual network
+    azure_rm_virtualnetwork:
+      resource_group: "{{ env_azure.resource_group_name }}"
+      name: "{{ env_azure.vnet.name }}"
+      address_prefixes: "{{ env_azure.vnet.ip }}"
+
+  - name: Create Network Security Group that allows SSH
+    azure_rm_securitygroup:
+      resource_group: "{{ env_azure.resource_group_name }}"
+      name: "{{ item.sg }}"
+      rules: "{{ item.rules }}"
+    with_items: "{{ env_azure.subnets }}"
+
+  - name: Add subnet
+    azure_rm_subnet:
+      resource_group: "{{ env_azure.resource_group_name }}"
+      name: "{{ item.name }}"
+      address_prefix: "{{ item.ip }}"
+      virtual_network: "{{ env_azure.vnet.name }}"
+      security_group: "{% if item.name != 'GatewaySubnet' %}{{ item.sg }}{% endif %}"
+    with_items: "{{ env_azure.subnets }}"
+

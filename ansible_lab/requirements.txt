@@ -1,4 +1,6 @@
-ansible==4.2.0
+ansible
 boto
 boto3
 yamllint
+
+#https://github.com/Azure/azure_modules

@@ -1,0 +1,20 @@
+docker_version: 5:19.03.14*
+containerd_io_version: 1.2.10*
+docker_max_logs_size: 100m                   
+docker_edition: ce                           
+                                             
+docker_package: "docker-{{ docker_edition }}"
+docker_package_state: present                
+
+
+k8s_version: 1.19.14*
+
+
+override_install: false
+
+docker_user: "{{ ansible_user }}"
+
+ansible_user: "{{ ansible_ssh_user }}"
+
+kubernetes_join_command_extra_opts: ""
+ansible_swaptotal_mb: 0

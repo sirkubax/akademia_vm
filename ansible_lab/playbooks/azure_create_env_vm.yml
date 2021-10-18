@@ -1,0 +1,15 @@
+# https://docs.microsoft.com/en-us/azure/virtual-machines/linux/ansible-create-complete-vm
+#
+# az group create --name edm-poc-eu-west --location westeurope
+
+- name: Create Azure VM
+  hosts: localhost
+  connection: local
+
+  roles:
+    - set_azure_credentials
+    - create_environment
+    - create_vm
+
+  tasks: []
+

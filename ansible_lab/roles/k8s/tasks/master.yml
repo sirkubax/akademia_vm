@@ -1,0 +1,36 @@
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: kubeadm init --apiserver-cert-extra-sans="{{ inventory_hostname }}"  --pod-network-cidr=192.168.0.0/16 {{ extra_k8s_flags | default('') }} --upload-certs  --control-plane-endpoint {{ inventory_hostname }}
+    #  #kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans IP
+
+- name: Setup kubeconfig for technical user {{ ansible_user }}
+  command: "{{ item }}"
+  with_items:
+  - mkdir -p /home/{{ ansible_user }}/.kube
+  - cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+  - chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+
+- name: Install calico pod network
+  #become: false
+  #command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+
+  #kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
+- name: Install calico pod network - fix bug with rp_filter
+  #become: false
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
+
+- name: Install storage
+  #become: false
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+- name: Remove taint on master node
+  #become: false
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes k8s-node-1 node-role.kubernetes.io/master:NoSchedule-
+
+#- name: Generate join command
+#  command: kubeadm token create --print-join-command
+#  register: join_command
+#
+#- name: Copy join command to local file
+#  become: false
+#  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"

@@ -1,0 +1,202 @@
+ansible_ssh_user: ubuntu
+ansible_ssh_private_key_file: ~/.ssh/example_key
+vm_default_image:
+    offer: 0001-com-ubuntu-server-focal
+    publisher: Canonical
+    sku: 20_04-lts
+    version: latest
+env_azure:
+    subscription_id: 149007b7-60ed-49ae-983a-b038a901db43
+    resource_group_name: K8S
+    location: westeurope
+    vnet: 
+      ip: 10.39.0.0/16
+      name: K8S-ans-vnet
+    subnets: 
+      # VGW
+      #- name: GatewaySubnet 
+      #  ip: 10.39.0.0/24
+      #  sg: K8S-gateway-sg
+      #  rules:
+      #   - name: SSH
+      #     protocol: Tcp
+      #     source_address_prefix: 
+      #       - '10.39.0.0/16'
+      #     destination_port_range: 22
+      #     access: Allow
+      #     priority: 1001
+      #  vm: []
+
+      # SUBNET A
+      - name: K8S-ans-subnet
+        ip: 10.39.1.0/24
+        sg: K8S-a-sg
+        rules:
+        - name: SSH
+          protocol: Tcp
+          source_address_prefix: 
+            - '10.39.0.0/24'
+            - '10.39.1.0/24'
+            - '83.28.213.39/32'
+            - '83.28.213.71/32'
+          destination_port_range: 22 
+          access: Allow
+          priority: 1001
+        - name: k8s
+          protocol: Tcp
+          source_address_prefix: 
+            - '10.39.0.0/24'
+            - '10.39.1.0/24'
+            - '83.28.213.71/32'
+            - '40.118.121.196/32' #node-1 k3s
+            - 20.101.115.212/32
+            - 20.86.108.168/32
+            #TODO add all node_IPs 
+          destination_port_range: 6443
+          access: Allow
+          priority: 1002
+        - name: k8s-443
+          protocol: Tcp
+          source_address_prefix: 
+            - '10.39.0.0/24'
+            - '10.39.1.0/24'
+            - '83.28.213.71/32'
+          destination_port_range: 443
+          access: Allow
+          priority: 1003
+        vm:
+          #- name: jumphost
+          #  network_interface:
+          #    name: K8S-a-jumphost-ni
+          #    public_ip: jumphost-pub-ip
+          #  vm_size: Standard_DS2_v2
+          #  os_disk_size_gb: 30
+          #  username: ubuntu
+          #  managed_disk_type: Standard_LRS
+          #  data_disks:
+          #      - lun: 0
+          #        disk_size_gb: 20
+          #        managed_disk_type: Standard_LRS
+          #  image:
+          #      offer: CentOS
+          #      publisher: OpenLogic
+          #      sku: 7_9-gen2
+          #      version: latest
+        - name: k8s--ans-node-1
+          network_interface:
+            name: K8S-ans-node-1-ni
+            public_ip: k8s-ans-node-1-pub-ip  #comment this if we'd like to jump via bastion
+          vm_size: Standard_D2_v2
+          os_disk_size_gb: 30
+          username: ubuntu
+          managed_disk_type: Standard_LRS
+          image:
+            offer: 0001-com-ubuntu-server-focal
+            publisher: Canonical
+            sku: '20_04-lts'
+            version: latest
+          data_disks: []
+          #    - lun: 0
+          #      disk_size_gb: 20
+          #      managed_disk_type: Standard_LRS
+          time: " --time 1900 "
+        - name: k8s--ans-node-2
+          network_interface:
+            name: K8S-ans-node-2-ni
+            public_ip: k8s-ans-node-2-pub-ip  #comment this if we'd like to jump via bastion
+          vm_size: Standard_D2_v2
+          os_disk_size_gb: 30
+          username: ubuntu
+          managed_disk_type: Standard_LRS
+          image:
+            offer: 0001-com-ubuntu-server-focal
+            publisher: Canonical
+            sku: '20_04-lts'
+            version: latest
+          data_disks: []
+          time: " --time 1900 "
+        - name: k8s--ans-node-3
+          network_interface:
+            name: K8S-ans-node-3-ni
+            public_ip: k8s-ans-node-3-pub-ip  #comment this if we'd like to jump via bastion
+          vm_size: Standard_D2_v2
+          os_disk_size_gb: 30
+          username: ubuntu
+          managed_disk_type: Standard_LRS
+          image:
+            offer: 0001-com-ubuntu-server-focal
+            publisher: Canonical
+            sku: '20_04-lts'
+            version: latest
+          data_disks: []
+          time: " --time 1900 "
+        - name: k8s--ans-node-4
+          network_interface:
+            name: K8S-ans-node-4-ni
+            public_ip: k8s-ans-node-4-pub-ip  #comment this if we'd like to jump via bastion
+          vm_size: Standard_D2_v2
+          os_disk_size_gb: 30
+          username: ubuntu
+          managed_disk_type: Standard_LRS
+          image:
+            offer: 0001-com-ubuntu-server-focal
+            publisher: Canonical
+            sku: '20_04-lts'
+            version: latest
+          data_disks: []
+          time: " --time 1900 "
+          #- name: k8s--ans-node-5
+          #  network_interface:
+          #    name: K8S-ans-node-5-ni
+          #    public_ip: k8s-ans-node-5-pub-ip  #comment this if we'd like to jump via bastion
+          #  vm_size: Standard_D2_v2
+          #  os_disk_size_gb: 30
+          #  username: ubuntu
+          #  managed_disk_type: Standard_LRS
+          #  image:
+          #    offer: 0001-com-ubuntu-server-focal
+          #    publisher: Canonical
+          #    sku: '20_04-lts'
+          #    version: latest
+          #  data_disks: []
+          #  time: " --time 1900 "
+
+      # SUBNET B
+
+      # SUBNET B
+
+      # SUBNET B
+      #- name: K8S-app-subnet
+      #  ip: 10.39.2.0/24
+      #  sg: K8S-app-sg
+      #  rules:
+      #  - name: SSH
+      #    protocol: Tcp
+      #    source_address_prefix: 
+      #      #- '10.39.0.0/24'
+      #      #- '10.39.1.0/24'
+      #      - '83.28.213.39/32'
+      #    destination_port_range: 22
+      #    access: Allow
+      #    priority: 1001
+      #  - name: cutSSH
+      #    protocol: Tcp
+      #    source_address_prefix: 
+      #      - '10.39.0.0/16'
+      #      #- '10.39.1.0/24'
+      #    destination_port_range: 22
+      #    access: Deny
+      #    priority: 1002
+      #  vm:
+      #  - name: second-app
+      #    network_interface:
+      #      name: K8S-second-app-ni
+      #      public_ip: rejestr-app-pub-ip
+      #    vm_size: Standard_DS1_v2
+      #    os_disk_size_gb: 30
+      #    username: ubuntu
+      #    managed_disk_type: Standard_LRS
+      #    data_disks:
+      #        - lun: 0
+      #          disk_size_gb: 20
+      #          managed_disk_type: Standard_LRS

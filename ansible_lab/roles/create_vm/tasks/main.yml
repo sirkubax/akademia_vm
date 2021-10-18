@@ -1,0 +1,65 @@
+  - name: Create a public ip address
+    azure_rm_publicipaddress:
+      resource_group: "{{ env_azure.resource_group_name }}"
+      name: vpn-gw-pub-ip
+      allocation_method: Dynamic
+
+#  - name: Create virtual network gateway without bgp settings
+#    azure_rm_virtualnetworkgateway:
+#      resource_group: "{{ env_azure.resource_group_name }}"
+#      name: vpn-gw
+#      ip_configurations:
+#       - name: vpn-gw-pub-ip-conf
+#         private_ip_allocation_method: Dynamic
+#         public_ip_address_name: vpn-gw-pub-ip
+#      virtual_network: "{{ env_azure.vnet.name }}"
+
+  - name: Create virtual network inteface card
+    azure_rm_networkinterface:
+      resource_group: "{{ env_azure.resource_group_name }}"
+      name: "{{ item.1.network_interface.name }}"
+      virtual_network: "{{ env_azure.vnet.name }}"
+      subnet: "{{ item.0.name }}"
+      ip_configurations: 
+      - name: default
+        primary: True
+        public_ip_address_name: "{{ item.1.network_interface.public_ip | default('') }}"
+        public_ip_allocation_method: Static
+      security_group: "{{ item.0.sg }}"
+    loop: "{{ env_azure.subnets | subelements('vm') }}"
+    loop_control:
+      label: "{{ item.0.name }}"
+
+  - name: Create VM
+    azure_rm_virtualmachine:
+      resource_group: "{{ env_azure.resource_group_name }}"
+      name: "{{ item.1.name }}"
+      vm_size: "{{ item.1.vm_size }}"
+      os_disk_size_gb: "{{ item.1.os_disk_size_gb | default('20') }}"
+      admin_username: "{{ item.1.username }}"
+      ssh_password_enabled: false
+      ssh_public_keys: 
+        - path: "/home/{{ item.1.username }}/.ssh/authorized_keys"
+          key_data: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC5j+1yfVvGbov764UaZSyfTzNrRs+eo6ckOkwZkEbhCiqTGZV6KfP/ku8az3bafT69Qc3UaMiZdQiA4jxcsMNiDMqycrftG22BSca+rMIAhh1NwY28Yq8/3RlyStFveUdo9haKFqfO4pCnJKmyVgg4m/uzL3x7pyTn5un6Ewb9bAL6ZtgIOPm8WNyrqFsSV0Vmwtl9Xbv4xc9QrCEpFYvc6WdlyKF23podIJQFhHBoWLeOfbL4Fbfvy3mTOlnz88abwBfpwHSSTcQUckE+9lOTpqLYBYKCUw6mCSb4UHeTIonQeZrWjgp/eBHscJGtN0DUcsY3/x9wb6LzUyoJRZrKPnbkQTMHmcOX70Dowz/Wnz2a8eHCpHLrwD5qtrQJR/Sc+d5sMSG8h3lbVLzMj9GfNtf/UtlPMTWy51bdEYrZsH20VNuoKq8lNCeCMB8MoeIvOdPExg/MEF5TGfAE8Hr7d3rmfEjRJ78byNFUHI0g6+vvtuGQCBf60+4f9Z4S+T8= examplekey"
+      network_interfaces: "{{ item.1.network_interface.name }}"
+      image:
+          offer: "{{ item.1.image.offer | default(vm_default_image.offer) }}"
+          publisher: "{{ item.1.image.publisher  | default(vm_default_image.publisher)}}"
+          sku: "{{ item.1.image.sku  | default(vm_default_image.sku)}}" 
+          version:  "{{ item.1.image.version  | default(vm_default_image.version )}}"
+      managed_disk_type: "{{ item.1.managed_disk_type }}"
+      data_disks: "{{ item.1.data_disks }}"
+    loop: "{{ env_azure.subnets | subelements('vm') }}"
+    loop_control:
+      label: "{{ item.0.name }}"
+    tags:
+     - vm
+
+  - name: Set auto-shutdown
+    #shell: echo auto-shutdown ; az vm auto-shutdown --resource-group {{ env_azure.resource_group_name }} --name {{ item.1.name }} --time {{ item.1.time }}
+    shell: echo auto-shutdown ; az vm auto-shutdown --resource-group {{ env_azure.resource_group_name }} --name {{ item.1.name }} {{ item.1.time }}
+    loop: "{{ env_azure.subnets | subelements('vm') }}"
+    loop_control:
+      label: "{{ item.0.name }}"
+    when:  item.1.time is defined
+
