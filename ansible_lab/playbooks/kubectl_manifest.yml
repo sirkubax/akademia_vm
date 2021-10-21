@@ -1,0 +1,15 @@
+- hosts: k8s_nodes
+  tags:
+    - k8s_all
+  become: true
+  
+  tasks:
+  - pip:
+      name: openshift
+
+  - name:  Install calico pod network  with community.kubernetes.k8s
+    community.kubernetes.k8s:
+      state: present
+      src: calico.yaml
+      #definition: "{{ lookup('file', 'calico.yaml') | from_yaml }}"
+    run_once: yes

@@ -51,6 +51,7 @@ env_azure:
             - '40.118.121.196/32' #node-1 k3s
             - 20.101.115.212/32
             - 20.86.108.168/32
+            - 20.101.112.77/32
             #TODO add all node_IPs 
           destination_port_range: 6443
           access: Allow

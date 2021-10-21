@@ -1,0 +1,14 @@
+- hosts: k8s_nodes_aws
+  tags:
+    - k8s_all
+  become: true
+
+  roles:
+#    #https://galaxy.ansible.com/pandemonium1986/k8s_toolbox
+    - role: k9s
+      tags: k9s
+    - role: k8s
+      tags: k8s
+    - role: sys_manage_keys
+      tags: ssh_keys
+

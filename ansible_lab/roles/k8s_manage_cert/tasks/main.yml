@@ -1,0 +1,25 @@
+---
+- name: Check if Kubernetes has already been initialized.
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_init_stat
+
+- name: Get the kubeadm cert expiration date
+  command: kubeadm alpha certs check-expiration
+  when: 
+    - inventory_hostname in groups['k8s_master_nodes']
+
+- name: Renew certificates
+  command: kubeadm alpha certs renew admin.conf
+  when: 
+    - inventory_hostname in groups['k8s_master_nodes']
+
+- name: Renew all certificates
+  command: kubeadm alpha certs renew all
+  when: 
+    - inventory_hostname in groups['k8s_nodes']
+
+- name: Get the kubeadm cert expiration date
+  command: kubeadm alpha certs check-expiration
+  when: 
+    - inventory_hostname in groups['k8s_nodes']

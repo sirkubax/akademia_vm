@@ -8,26 +8,20 @@ system_env = prod
 #static 20.105.201.142
 
 [k3s_nodes]
-40.118.121.196
 
 [k3s_nodes_cluster]
-40.118.121.196
-20.101.115.212
-20.86.108.168
 
 [k8s_nodes]
-40.118.121.196
-20.101.115.212
-20.86.108.168
-20.101.112.77
+35.176.166.161 ansible_ssh_private_key_file=~/.ssh/szkolenie_05_london.pem
+13.40.28.111 ansible_ssh_private_key_file=~/.ssh/szkolenie_05_london.pem
+3.8.127.99 ansible_ssh_private_key_file=~/.ssh/szkolenie_05_london.pem
 
 [k8s_master_nodes]
-40.118.121.196
-20.101.115.212
-20.86.108.168
+35.176.166.161 ansible_ssh_private_key_file=~/.ssh/szkolenie_05_london.pem
+13.40.28.111 ansible_ssh_private_key_file=~/.ssh/szkolenie_05_london.pem
+3.8.127.99 ansible_ssh_private_key_file=~/.ssh/szkolenie_05_london.pem
 
 [k8s_compute_nodes]
-20.101.112.77
 
 [k8s_infra_nodes]
 

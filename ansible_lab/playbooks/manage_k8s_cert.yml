@@ -1,0 +1,11 @@
+- hosts: k8s_master_nodes
+
+- hosts: k8s_nodes
+  tags:
+    - k8s_all
+  become: true
+
+  roles:
+    - role: k8s_manage_cert
+      tags: k8s_manage_cert
+

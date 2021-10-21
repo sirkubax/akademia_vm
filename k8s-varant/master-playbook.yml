@@ -104,6 +104,10 @@
       become: false
       command: kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
 
+    - name: Install calico pod network
+      become: false
+      command: kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
+
     - name: Generate join command
       command: kubeadm token create --print-join-command
       register: join_command

@@ -2,17 +2,60 @@
   command: kubeadm init --apiserver-cert-extra-sans="{{ inventory_hostname }}"  --pod-network-cidr=192.168.0.0/16 {{ extra_k8s_flags | default('') }} --upload-certs  --control-plane-endpoint {{ inventory_hostname }}
     #  #kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-cert-extra-sans IP
 
+- name: create /home/ubuntu/.kube
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+
+- name: Check if Kubernetes has already been initialized.
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubernetes_init_stat_master
+
+- name: wait for /etc/kubernetes/admin.conf
+  wait_for:
+    sleep: 15
+  when: kubernetes_init_stat_master.exist is defined and not kubernetes_init_stat_master.exist
+
+
 - name: Setup kubeconfig for technical user {{ ansible_user }}
-  command: "{{ item }}"
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    remote_src: yes
   with_items:
-  - mkdir -p /home/{{ ansible_user }}/.kube
-  - cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
-  - chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+    - src: /etc/kubernetes/admin.conf
+      dest: /home/{{ ansible_user }}/.kube/config
+      owner: "{{ ansible_user }}"
+
+- name: create /root/.kube
+  file:
+    path: "/root/.kube"
+    state: directory
+
+- name: Setup kubeconfig for root
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    remote_src: yes
+  with_items:
+    - src: /etc/kubernetes/admin.conf
+      dest: /home/{{ ansible_user }}/.kube/config
+      owner: root
+
 
 - name: Install calico pod network
   #become: false
   #command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
   command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+
+#- name:  Install calico pod network  with community.kubernetes.k8s
+#  community.kubernetes.k8s:
+#    state: present
+#    definition: "{{ lookup('url', 'https://docs.projectcalico.org/v3.10/manifests/calico.yaml') | from_yaml }}"
 
   #kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
 - name: Install calico pod network - fix bug with rp_filter
@@ -26,6 +69,7 @@
 - name: Remove taint on master node
   #become: false
   command: kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes k8s-node-1 node-role.kubernetes.io/master:NoSchedule-
+  ignore_errors: true
 
 #- name: Generate join command
 #  command: kubeadm token create --print-join-command

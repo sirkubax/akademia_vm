@@ -17,6 +17,7 @@
   when: ( inventory_hostname == groups['k8s_master_nodes']|first and not kubernetes_init_stat.stat.exists) or override_install
   run_once: true
 
+
 - name: Generate join command
   command: kubeadm token create --print-join-command
   register: join_command
