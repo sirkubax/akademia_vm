@@ -31,6 +31,7 @@ fi
 if [ "$__venv_created" = true ] || [ "$__install_requirements" = true ]; then
   echo '-- Installing requirements'
   pip3 install -r $ANS_ROOT_DIR/requirements.txt || (echo '!!! pip install failed' && return)
+  pip3 install -r $ANS_ROOT_DIR/requirements-azure.txt || (echo '!!! pip install failed' && return)
 fi
 
 

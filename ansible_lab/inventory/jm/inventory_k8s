@@ -1,0 +1,11 @@
+plugin: kubernetes.core.k8s
+connections:
+  - kubeconfig: ~/.kube/k3s20.224.122.229
+
+#https://docs.ansible.com/ansible/latest/scenario_guides/kubernetes_scenarios/k8s_inventory.html
+#enable 
+#[inventory]
+#enable_plugins = kubernetes.core.k8s
+#
+#
+#https://docs.ansible.com/ansible/devel/collections/kubernetes/core/docsite/kubernetes_scenarios/k8s_inventory.html

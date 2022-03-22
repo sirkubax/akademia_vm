@@ -9,13 +9,13 @@ resourceGroupName=$groupName
 resourceLocation="westeurope" # "eastus" or "westeurope"
 vnetName=k8s-vnet
 subnetName=k8s-subnet
-clusterName=k8s-v1
+clusterName=k8s-v1-script
 
 kubeConfFile=/etc/kubernetes/admin.conf
 #kubeConfFile=/etc/rancher/k3s/k3s.yaml
 
-nodeName=k8s-node-1
-pubIpName=k8s-node-1
+nodeName=k8s-node-1-script
+pubIpName=k8s-node-1-script
 
 az account set --subscription $MySubscription
 

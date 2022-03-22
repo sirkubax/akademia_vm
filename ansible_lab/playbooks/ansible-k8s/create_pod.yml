@@ -1,0 +1,34 @@
+---
+- hosts: localhost
+  collections:
+    - kubernetes.core
+  tasks:
+  - name: Create a pod
+    k8s:
+      kubeconfig: ~/.kube/k3s20.224.122.229
+      state: present
+      definition:
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: "utilitypod-1"
+          namespace: default
+          labels:
+            app: galaxy
+        spec:
+          containers:
+          - name: utilitypod
+            image: ubuntu
+            args: 
+              - sleep 
+              - 300d
+
+  - name: Get a list of all Services in the myapp namespace.
+    kubernetes.core.k8s_info:
+      kubeconfig: ~/.kube/k3s20.224.122.229
+      kind: Pod
+      namespace: default
+
+
+#https://docs.ansible.com/ansible/latest/scenario_guides/kubernetes_scenarios/scenario_k8s_object.html
+#https://github.com/ansible-collections/kubernetes.core

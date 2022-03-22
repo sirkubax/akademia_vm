@@ -27,3 +27,7 @@
     src:        "{{ k9s_installation_path }}/{{ binary_name }}"
     dest:       "/usr/local/bin/{{ binary_name }}"
     state:      link
+
+- name: install packages
+  apt:
+    name: net-tools

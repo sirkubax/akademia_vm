@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  collections:
+    - kubernetes.core
+  tasks:
+  - name: Create a namespace
+    k8s:
+      kubeconfig: ~/.kube/k3s20.224.122.229
+      state: present
+      definition:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "utility"
+
+#https://docs.ansible.com/ansible/latest/scenario_guides/kubernetes_scenarios/scenario_k8s_object.html
+#https://github.com/ansible-collections/kubernetes.core

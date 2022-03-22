@@ -49,7 +49,9 @@ env_azure:
             - '10.39.1.0/24'
             - '83.28.213.71/32'
             - '40.118.121.196/32' #node-1 k3s
-            - 20.224.219.29/32
+            - 20.101.115.212/32
+            - 20.86.108.168/32
+            - 20.101.112.77/32
             #TODO add all node_IPs 
           destination_port_range: 6443
           access: Allow
@@ -60,7 +62,6 @@ env_azure:
             - '10.39.0.0/24'
             - '10.39.1.0/24'
             - '83.28.213.71/32'
-            - 20.224.219.29/32
           destination_port_range: 443
           access: Allow
           priority: 1003
@@ -145,21 +146,21 @@ env_azure:
             version: latest
           data_disks: []
           time: " --time 1900 "
-#- name: k8s--ans-node-5
-#  network_interface:
-#    name: K8S-ans-node-5-ni
-#    public_ip: k8s-ans-node-5-pub-ip  #comment this if we'd like to jump via bastion
-#  vm_size: Standard_D2_v2
-#  os_disk_size_gb: 30
-#  username: ubuntu
-#  managed_disk_type: Standard_LRS
-#  image:
-#    offer: 0001-com-ubuntu-server-focal
-#    publisher: Canonical
-#    sku: '20_04-lts'
-#    version: latest
-#  data_disks: []
-#  time: " --time 1900 "
+          #- name: k8s--ans-node-5
+          #  network_interface:
+          #    name: K8S-ans-node-5-ni
+          #    public_ip: k8s-ans-node-5-pub-ip  #comment this if we'd like to jump via bastion
+          #  vm_size: Standard_D2_v2
+          #  os_disk_size_gb: 30
+          #  username: ubuntu
+          #  managed_disk_type: Standard_LRS
+          #  image:
+          #    offer: 0001-com-ubuntu-server-focal
+          #    publisher: Canonical
+          #    sku: '20_04-lts'
+          #    version: latest
+          #  data_disks: []
+          #  time: " --time 1900 "
 
       # SUBNET B
 

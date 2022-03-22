@@ -1,1 +1,1 @@
-kubeadm join 35.176.166.161:6443 --token suhcur.vq8k5w1k1g995zvd     --discovery-token-ca-cert-hash sha256:94043584053fb3c5fe58ad15a5bf858c5907b1232c873261d070f3c3439a5d7d 
+kubeadm join 20.224.251.237:6443 --token i9py0g.jrsrrwlwx5axdfbw     --discovery-token-ca-cert-hash sha256:1859533ae688432f63dbab94c5b63dcf396395a4434612d62f221dc8224b68a0 

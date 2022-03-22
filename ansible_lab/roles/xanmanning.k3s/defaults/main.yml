@@ -9,7 +9,8 @@
 k3s_state: installed
 
 # Use a specific k3s version, if set to "false" we will get the latest
-k3s_release_version: v1.19.14+k3s1
+#k3s_release_version: v1.19.14+k3s1
+#k3s_release_version: v1.19.14+k3s1
 #https://github.com/k3s-io/k3s/releases/download/v1.19.13%2Bk3s1/sha256sum-amd64.txt
 #k3s_release_version: false
 

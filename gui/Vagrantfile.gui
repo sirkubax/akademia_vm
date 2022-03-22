@@ -10,6 +10,7 @@ Vagrant.configure("2") do |config|
         v.gui = true
         v.customize ["modifyvm", :id, "--vram", "64"]
     end
+#akceleracja 3d
 #https://askubuntu.com/questions/1134892/ubuntu-18-04-20-04-lts-on-virtualbox-boots-up-but-black-login-screen
 # gui 64mb for vbox-guest
       
